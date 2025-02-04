@@ -14,7 +14,7 @@ DEFAULT_PARAMS = {
     "show_reasoning": True
 }
 
-# System templates with reasoning
+
 TEMPLATES = {
     "coder": """You are an expert programmer. For each response:
 1. First think step-by-step about the best approach (prefix with 'Reasoning:')
@@ -186,7 +186,7 @@ Current Parameters:
         if subcmd == "list":
             print(colored("\nAvailable templates:", 'cyan'))
             for name in TEMPLATES:
-                desc = TEMPLATES[name].split('\n')[0]  # Get first line as description
+                desc = TEMPLATES[name].split('\n')[0]
                 print(f"  {name}: {desc[:50]}...")
         elif subcmd == "use" and len(cmd_parts) == 3:
             template_name = cmd_parts[2].lower()
@@ -224,7 +224,7 @@ Current Parameters:
     return True
 
 def chat(config):
-    base_url = "http://192.168.111.39:7869"
+    base_url = "http://localhost:7869"
     models = get_available_models(base_url)
     process = psutil.Process()
     
@@ -243,7 +243,7 @@ def chat(config):
     while True:
         try:
             user_input = input(colored("\nYou: ", 'blue'))
-            print(' ' * 100, end='\r')  # Clear token counter line
+            print(' ' * 100, end='\r') 
             
             if not user_input.strip():
                 continue
@@ -255,7 +255,7 @@ def chat(config):
                 
             # Show token information as user types
             current_tokens = calculate_token_estimate(user_input)
-            estimated_completion = current_tokens * 2  # Simple estimation
+            estimated_completion = current_tokens * 2 
             progress_bar = get_progress_bar(current_tokens, config.max_tokens)
             print(f"[Tokens: {current_tokens}/{config.max_tokens}] [Est. completion: ~{estimated_completion}] {progress_bar}")
                 
