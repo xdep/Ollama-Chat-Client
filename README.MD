@@ -67,6 +67,7 @@ python3 ollama_chat.py --temperature 0.8 --template coder    # Set initial param
 - `/tokens <number>` - Set max tokens per response
 - `/params` - Show current parameters
 - `/reset` - Reset parameters to defaults
+- `/reasoning on|off`  - Toggle showing model's reasoning process
 
 #### Templates
 - `/template list` - Show available templates
