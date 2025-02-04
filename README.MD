@@ -25,7 +25,7 @@ A feature-rich command-line interface for interacting with Ollama models, featur
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/xdep/ollama-chat-client.git
+git clone git@github.com:xdep/Ollama-Chat-Client.git
 cd ollama-chat-client
 ```
 
