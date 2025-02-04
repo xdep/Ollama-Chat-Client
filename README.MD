@@ -2,6 +2,8 @@
 
 A feature-rich command-line interface for interacting with Ollama models, featuring real-time token counting, template system, and advanced parameter controls.
 
+![Alt text](https://github.com/xdep/Ollama-Chat-Client/blob/main/example.png)
+
 ## Features
 
 - Real-time token counting with visual progress bar
