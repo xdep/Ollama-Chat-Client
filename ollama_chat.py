@@ -10,16 +10,46 @@ from termcolor import colored
 DEFAULT_PARAMS = {
     "temperature": 0.7,
     "top_p": 0.9,
-    "max_tokens": 2048
+    "max_tokens": 2048,
+    "show_reasoning": True
 }
 
-# System templates
+# System templates with reasoning
 TEMPLATES = {
-    "coder": "You are an expert programmer. Provide detailed, well-documented code with explanations.",
-    "writer": "You are a creative writer. Focus on engaging, descriptive language.",
-    "analyst": "You are a data analyst. Provide detailed, analytical responses with clear reasoning.",
-    "teacher": "You are a patient teacher. Explain concepts clearly with examples.",
-    "concise": "You provide brief, direct answers without unnecessary details."
+    "coder": """You are an expert programmer. For each response:
+1. First think step-by-step about the best approach (prefix with 'Reasoning:')
+2. Then provide the solution (prefix with 'Solution:')
+3. Finally, explain any important considerations (prefix with 'Notes:')
+Provide detailed, well-documented code with explanations.""",
+
+    "writer": """You are a creative writer. For each response:
+1. First analyze the writing task (prefix with 'Analysis:')
+2. Consider style and approach (prefix with 'Style Considerations:')
+3. Then provide the writing (prefix with 'Content:')
+Focus on engaging, descriptive language.""",
+
+    "analyst": """You are a data analyst. For each response:
+1. First analyze the question carefully (prefix with 'Analysis:')
+2. List key considerations (prefix with 'Considerations:')
+3. Provide methodology (prefix with 'Method:')
+4. Then provide your conclusion (prefix with 'Conclusion:')
+Provide detailed, analytical responses with clear reasoning.""",
+
+    "teacher": """You are a patient teacher. For each response:
+1. First break down the concept (prefix with 'Understanding:')
+2. Identify potential confusion points (prefix with 'Common Misconceptions:')
+3. Then explain step by step (prefix with 'Explanation:')
+4. Provide examples (prefix with 'Examples:')
+Explain concepts clearly and thoroughly.""",
+
+    "concise": "You provide brief, direct answers without unnecessary details.",
+    
+    "reasoning": """For each response:
+1. First analyze the question (prefix with 'Analysis:')
+2. Break down your thinking process (prefix with 'Reasoning:')
+3. List key points to consider (prefix with 'Key Points:')
+4. Then provide your response (prefix with 'Response:')
+5. Add any caveats or limitations (prefix with 'Limitations:')"""
 }
 
 def calculate_token_estimate(text):
@@ -44,6 +74,7 @@ class ChatConfig:
         self.max_tokens = args.max_tokens if args.max_tokens is not None else DEFAULT_PARAMS["max_tokens"]
         self.template = args.template
         self.current_template = TEMPLATES.get(self.template, "")
+        self.show_reasoning = True
 
 def show_chat_help():
     help_text = """
@@ -54,10 +85,11 @@ Available Commands:
     /tokens <number>     - Set max tokens per response
     /params             - Show current parameters
     /reset             - Reset parameters to defaults
+    /reasoning on|off  - Toggle showing model's reasoning process
 
   Templates:
     /template list      - Show available templates
-    /template use NAME  - Switch to template (coder/writer/analyst/teacher/concise)
+    /template use NAME  - Switch to template (coder/writer/analyst/teacher/concise/reasoning)
     /template show      - Show current template
     /template custom    - Set custom template
 
@@ -108,6 +140,19 @@ def handle_command(cmd, config, conversation):
         show_chat_help()
         return True
     
+    elif command == "/reasoning":
+        if len(cmd_parts) == 2:
+            if cmd_parts[1].lower() in ['on', 'off']:
+                config.show_reasoning = (cmd_parts[1].lower() == 'on')
+                state = "enabled" if config.show_reasoning else "disabled"
+                print(colored(f"Reasoning output {state}", 'green'))
+            else:
+                print(colored("Invalid option. Use 'on' or 'off'", 'red'))
+        else:
+            print(colored("Current reasoning state:", 'cyan'), 
+                  "enabled" if config.show_reasoning else "disabled")
+        return True
+    
     elif command == "/temp":
         if len(cmd_parts) == 2:
             try:
@@ -128,6 +173,7 @@ Current Parameters:
   Top_P: {config.top_p}
   Max Tokens: {config.max_tokens}
   Template: {config.template or 'None'}
+  Reasoning: {'enabled' if config.show_reasoning else 'disabled'}
         """, 'cyan'))
         return True
     
@@ -140,7 +186,8 @@ Current Parameters:
         if subcmd == "list":
             print(colored("\nAvailable templates:", 'cyan'))
             for name in TEMPLATES:
-                print(f"  {name}: {TEMPLATES[name][:50]}...")
+                desc = TEMPLATES[name].split('\n')[0]  # Get first line as description
+                print(f"  {name}: {desc[:50]}...")
         elif subcmd == "use" and len(cmd_parts) == 3:
             template_name = cmd_parts[2].lower()
             if template_name in TEMPLATES:
@@ -177,7 +224,7 @@ Current Parameters:
     return True
 
 def chat(config):
-    base_url = "http://localhost:7869"
+    base_url = "http://192.168.111.39:7869"
     models = get_available_models(base_url)
     process = psutil.Process()
     
@@ -266,9 +313,12 @@ def main():
     parser.add_argument('-tp', '--top-p', type=float, help='Set top_p (0.0-1.0, default: 0.9)')
     parser.add_argument('-mt', '--max-tokens', type=int, help='Set max tokens (default: 2048)')
     parser.add_argument('--template', choices=list(TEMPLATES.keys()), help='Set initial template')
+    parser.add_argument('--no-reasoning', action='store_true', help='Start with reasoning disabled')
     
     args = parser.parse_args()
     config = ChatConfig(args)
+    if args.no_reasoning:
+        config.show_reasoning = False
     
     try:
         import termcolor
