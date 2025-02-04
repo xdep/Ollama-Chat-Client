@@ -42,14 +42,14 @@ pip install requests termcolor psutil
 
 ### Basic Usage
 ```bash
-python3 chat.py
+python3 ollama_chat.py
 ```
 
 ### Command Line Arguments
 ```bash
-python3 chat.py -h                                    # Show help
-python3 chat.py --model tinyllama                     # Start with specific model
-python3 chat.py --temperature 0.8 --template coder    # Set initial parameters
+python3 ollama_chat.py -h                                    # Show help
+python3 ollama_chat.py --model tinyllama                     # Start with specific model
+python3 ollama_chat.py --temperature 0.8 --template coder    # Set initial parameters
 ```
 
 ### Available Command-line Arguments
